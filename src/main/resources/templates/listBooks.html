@@ -2,58 +2,74 @@
 <html xmlns:th="http://www.thymeleaf.org" lang="">
 <head>
     <meta charset="utf-8">
-    <title>Book Search</title>
+    <title>Book Reservation</title>
+    <link rel="stylesheet"
+          href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+          crossorigin="anonymous">
+    <script src="https://kit.fontawesome.com/e59232f0a1.js" crossorigin="anonymous"></script>
     <style>
-        body { width: 800px; margin: auto; font-family: Arial, sans-serif; }
-        h1 { text-align: center; }
-        form { margin-top: 20px; }
-        label { display: block; margin-top: 10px; font-weight: bold; }
-        input[type="text"], input[type="number"] {
-            width: 100%; padding: 8px; margin-top: 4px;
-        }
-        input[type="submit"] {
-            margin-top: 15px; padding: 8px 16px; background: #4CAF50; color: white; border: none; border-radius: 5px;
-        }
-        .book-option { border: 1px solid #ccc; border-radius: 5px; padding: 10px; margin: 5px 0; }
+        body { width: 900px; margin: auto; font-family: Arial, sans-serif; }
+        h1, h2 { text-align: center; }
+        .book-item { border: 1px solid #ccc; border-radius: 5px; padding: 10px; margin: 10px 0; }
+        .action-buttons { margin-top: 10px; }
+        .btn { margin-right: 5px; }
+        input[type="submit"] { margin-top: 10px; }
     </style>
 </head>
 <body>
-<h1>Book Reservation Search</h1>
 
-<!-- Search Form -->
-<form action="/books" method="GET">
-    <label for="title">Book name (partial or full):</label>
-    <input type="text" id="title" name="title" th:value="${title}">
+<h1>Book Reservation</h1>
 
-    <label for="minRating">Minimum rating:</label>
-    <input type="number" id="minRating" name="minRating" step="0.1" min="0" max="5" th:value="${minRating}">
-
-    <input type="submit" value="Search">
-</form>
-
-<!-- Search error or no books -->
-<div th:if="${books == null}">
-    <p>Please fill in both fields and click <strong>Search</strong> to see matching books.</p>
+<!-- Add New Book Button -->
+<div style="text-align: right; margin-bottom: 20px;">
+    <a th:href="@{/books/book-form}" class="btn btn-success">
+        <i class="fa fa-plus"></i> Add New Book
+    </a>
 </div>
 
+<!-- Books List -->
 <div th:if="${books != null}">
-    <h2 th:if="${#lists.isEmpty(books)}">No books match your search.</h2>
+    <h2 th:if="${#lists.isEmpty(books)}">No books found.</h2>
 
-    <!-- Book selection form -->
-    <form th:if="${!#lists.isEmpty(books)}" action="/bookReservation" method="POST">
-        <fieldset>
-            <legend>Choose a book:</legend>
+    <div th:if="${!#lists.isEmpty(books)}">
+        <th:block th:each="book : ${books}">
+            <div class="book-item">
+                <strong>Title:</strong> <span th:text="${book.title}"></span><br>
+                <strong>Genre:</strong> <span th:text="${book.genre}"></span><br>
+                <strong>Rating:</strong> <span th:text="${book.averageRating}"></span><br>
+                <strong>Author:</strong> <span th:text="${book.author.name + ' ' + book.author.surname}"></span>
+
+                <div class="action-buttons">
+                    <!-- Delete -->
+                    <form th:action="@{'/books/delete/' + ${book.id}}" method="post" style="display:inline;">
+                        <button type="submit" class="btn btn-sm btn-danger">
+                            <i class="fa fa-trash"></i> Delete
+                        </button>
+                    </form>
+
+                    <!-- Edit -->
+                    <a th:href="@{'/books/book-form/' + ${book.id}}" class="btn btn-sm btn-info">
+                        <i class="fa fa-edit"></i> Edit
+                    </a>
+                </div>
+            </div>
+        </th:block>
+    </div>
+</div>
+
+<!-- Reservation Form -->
+<div th:if="${!#lists.isEmpty(books)}" style="margin-top: 30px;">
+    <form action="/bookReservation" method="POST">
+        <fieldset class="book-item">
+            <legend>Select a book to reserve:</legend>
             <th:block th:each="book : ${books}">
-                <label class="book-option">
+                <label>
                     <input type="radio" name="bookTitle" th:value="${book.title}" required>
-                    Title: <span th:text="${book.title}"></span>,
-                    Genre: <span th:text="${book.genre}"></span>,
-                    Rating: <span th:text="${book.averageRating}"></span>
-                </label>
+                    <span th:text="${book.title}"></span> - <span th:text="${book.genre}"></span>
+                </label><br>
             </th:block>
         </fieldset>
 
-        <h3>Enter your information:</h3>
         <label>Your Name:</label>
         <input type="text" name="readerName" required>
 
@@ -63,26 +79,18 @@
         <label>Number of copies:</label>
         <input type="number" name="numberOfCopies" min="1" max="10" required>
 
-        <br>
-        <input type="submit" value="Reserve Book">
+        <input type="submit" value="Reserve Book" class="btn btn-primary">
     </form>
+</div>
 
-    <!-- Recently viewed books -->
-    <div th:if="${!#lists.isEmpty(recentBooks)}">
-        <fieldset>
-            <legend>Recently viewed:</legend>
-            <th:block th:each="book : ${recentBooks}">
-                <label>
-                    <input type="radio" name="bookTitle" th:value="${book}">
-                    <span th:text="${book}"></span>
-                </label>
-            </th:block>
-        </fieldset>
-    </div>
-    <div th:if="${#lists.isEmpty(recentBooks)}">
-        <p>No recently viewed books yet.</p>
-    </div>
-
+<!-- Recently Viewed Books -->
+<div th:if="${recentBooks != null and !#lists.isEmpty(recentBooks)}" style="margin-top: 20px;">
+    <fieldset class="book-item">
+        <legend>Recently viewed books:</legend>
+        <th:block th:each="book : ${recentBooks}">
+            <span th:text="${book}"></span><br>
+        </th:block>
+    </fieldset>
 </div>
 
 </body>

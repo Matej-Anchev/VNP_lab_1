@@ -25,4 +25,14 @@ public class BookServiceImpl implements BookService {
     public List<Book> searchBooks(String text, Double rating) {
         return bookRepository.searchBooks(text, rating);
     }
+
+    @Override
+    public void save(Book book) {
+        bookRepository.save(book);
+    }
+
+    @Override
+    public void delete(long id) {
+        bookRepository.delete(id);
+    }
 }

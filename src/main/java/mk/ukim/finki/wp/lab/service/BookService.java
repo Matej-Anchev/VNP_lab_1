@@ -7,4 +7,6 @@ import java.util.List;
 public interface BookService {
     List<Book> listAll();
     List<Book> searchBooks(String text, Double rating);
+    void save(Book book);
+    void delete(long id);
 }

@@ -29,4 +29,15 @@ public class InMemoryBookRepository  implements BookRepository {
 
         return result;
     }
+
+    @Override
+    public void save(Book book) {
+        delete(book.getId());
+        DataHolder.books.add(book);
+    }
+
+    @Override
+    public void delete(long id) {
+        DataHolder.books.removeIf(book -> book.getId().equals(id));
+    }
 }

@@ -20,6 +20,7 @@
 <body>
 <h1>Book Reservation Search</h1>
 
+<!-- Search Form -->
 <form action="/books" method="GET">
     <label for="title">Book name (partial or full):</label>
     <input type="text" id="title" name="title" th:value="${title}">
@@ -30,12 +31,15 @@
     <input type="submit" value="Search">
 </form>
 
+<!-- Search error or no books -->
 <div th:if="${books == null}">
     <p>Please fill in both fields and click <strong>Search</strong> to see matching books.</p>
 </div>
 
 <div th:if="${books != null}">
     <h2 th:if="${#lists.isEmpty(books)}">No books match your search.</h2>
+
+    <!-- Book selection form -->
     <form th:if="${!#lists.isEmpty(books)}" action="/bookReservation" method="POST">
         <fieldset>
             <legend>Choose a book:</legend>
@@ -62,6 +66,23 @@
         <br>
         <input type="submit" value="Reserve Book">
     </form>
+
+    <!-- Recently viewed books -->
+    <div th:if="${!#lists.isEmpty(recentBooks)}">
+        <fieldset>
+            <legend>Recently viewed:</legend>
+            <th:block th:each="book : ${recentBooks}">
+                <label>
+                    <input type="radio" name="bookTitle" th:value="${book}">
+                    <span th:text="${book}"></span>
+                </label>
+            </th:block>
+        </fieldset>
+    </div>
+    <div th:if="${#lists.isEmpty(recentBooks)}">
+        <p>No recently viewed books yet.</p>
+    </div>
+
 </div>
 
 </body>

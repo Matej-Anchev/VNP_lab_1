@@ -37,8 +37,5 @@ public class DataHolder {
         books.add(new Book("The Lord of the Rings", "Fantasy", 9.3, authors.get(0)));
         books.add(new Book("The Da Vinci Code", "Mystery", 7.6, authors.get(1)));
 
-
-
-
     }
 }

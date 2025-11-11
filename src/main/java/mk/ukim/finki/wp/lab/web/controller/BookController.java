@@ -3,12 +3,14 @@ package mk.ukim.finki.wp.lab.web.controller;
 import mk.ukim.finki.wp.lab.model.Author;
 import mk.ukim.finki.wp.lab.model.Book;
 import mk.ukim.finki.wp.lab.repository.BookRepository;
+import mk.ukim.finki.wp.lab.service.BookReservationService;
 import mk.ukim.finki.wp.lab.service.impl.AuthorServiceImpl;
 import mk.ukim.finki.wp.lab.service.impl.BookServiceImpl;
 import org.springframework.ui.Model;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -25,14 +27,22 @@ public class BookController {
     }
 
     @GetMapping
-    public String getBooksPage(@RequestParam(required = false) String error, Model model){
-        if(error!=null){
-            model.addAttribute("error",error);
+    public String getBooksPage(@RequestParam(required = false) String error,
+                               @RequestParam (required = false) String title,
+                               @RequestParam (required = false) String minRating,
+                               Model model) {
+        if (error != null) {
+            model.addAttribute("error", error);
+        }
+        List<Book> books = new ArrayList<>();
+
+        if (title != null && !title.isEmpty() && minRating != null && !minRating.isEmpty()) {
+            books = bookService.searchBooks(title, Double.valueOf(minRating));
+        } else {
+            books = bookService.listAll();
         }
 
-        List<Book> books=bookService.listAll();
-
-        model.addAttribute("books",books);
+        model.addAttribute("books", books);
 
         return "listBooks";
     }
@@ -41,39 +51,39 @@ public class BookController {
     public String saveBook(@RequestParam String title,
                            @RequestParam String genre,
                            @RequestParam Double averageRating,
-                           @RequestParam Long authorId){
+                           @RequestParam Long authorId) {
 
-        Author author=authorService.findById(authorId);
-        bookService.save(new Book(title,genre,averageRating,author));
+        Author author = authorService.findById(authorId);
+        bookService.save(new Book(title, genre, averageRating, author));
 
         return "redirect:/books";
     }
 
 
-    @GetMapping("/edit/{bookId}")
+    @PostMapping("/edit/{bookId}")
     public String editBook(@PathVariable Long bookId,
                            @RequestParam String title,
                            @RequestParam String genre,
                            @RequestParam Double averageRating,
-                           @RequestParam Long authorId){
+                           @RequestParam Long authorId) {
 
         bookService.delete(bookId);
 
-        Author author=authorService.findById(authorId);
+        Author author = authorService.findById(authorId);
 
-        bookService.save(new Book(title,genre,averageRating,author));
+        bookService.save(new Book(title, genre, averageRating, author));
 
         return "redirect:/books";
     }
 
     @PostMapping("/delete/{id}")
-    public String deleteBook(@PathVariable Long id){
+    public String deleteBook(@PathVariable Long id) {
         bookService.delete(id);
         return "redirect:/books";
     }
 
     @GetMapping("/book-form/{id}")
-    public String getEditBookForm(@PathVariable Long id, Model model){
+    public String getEditBookForm(@PathVariable Long id, Model model) {
         Book book = bookService.listAll()
                 .stream()
                 .filter(b -> b.getId().equals(id))
@@ -88,7 +98,20 @@ public class BookController {
     }
 
     @GetMapping("/book-form")
-    public String getAddBookPage(Model model){
+    public String getAddBookPage(Model model) {
+        model.addAttribute("authors", authorService.findAll());
         return "book-form";
     }
+
+    /*@GetMapping("/search")
+    public String Search(@RequestParam("title") String title, @RequestParam("minRating") String minRating, Model model) {
+        if (title != null && !title.isEmpty() && minRating != null && !minRating.isEmpty()) {
+            minRating = String.valueOf(Double.parseDouble(minRating));
+
+            List<Book> books = bookService.searchBooks(title, Double.valueOf(minRating));
+            model.addAttribute("books", books);
+
+        }
+        return "redirect:/books";
+    }*/
 }

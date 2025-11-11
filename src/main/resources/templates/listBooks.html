@@ -27,6 +27,23 @@
     </a>
 </div>
 
+<form action="books" method="GET">
+    <label for="title">Book name (partial or full):</label>
+    <input type="text" id="title" name="title" th:value="${title}">
+
+    <label for="minRating">Minimum rating:</label>
+    <input type="number" id="minRating" name="minRating" step="0.1" min="0" max="5" th:value="${minRating}">
+
+    <input type="submit" value="Search">
+</form>
+
+<div th:if="${books == null}">
+    <p>Please fill in both fields and click <strong>Search</strong> to see matching books.</p>
+</div>
+
+<div th:if="${books != null}">
+    <h2 th:if="${#lists.isEmpty(books)}">No books match your search.</h2>
+</div>
 <!-- Books List -->
 <div th:if="${books != null}">
     <h2 th:if="${#lists.isEmpty(books)}">No books found.</h2>
